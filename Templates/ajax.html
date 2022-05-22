@@ -1,0 +1,53 @@
+<html>
+
+<head>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+	<div class="form-group">
+  <label for="theName">Name:</label>
+  <input type="text" class="form-control" id="theName" >
+</div>
+<div class="form-group">
+  <label for="thefood">Food:</label>
+  <input type="text" class="form-control" id="thefood">
+</div>
+<button id='testBTN' type='button' onclick='po()'>testButton</button>
+
+
+<!--
+<script type=text/javascript>
+  $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
+</script>
+-->
+
+<script language="javascript" type="text/javascript">
+
+function po() {
+alert('test');
+var form_data = new FormData();
+form_data.append('theName', $("#theName").val());
+form_data.append('thefood', $("#thefood").val());
+// form_data.append('xxx', $("#xxx").text());
+//附帶text也是可以的
+$.ajax({
+      type: "POST",
+      url: "/route_function",
+      data: form_data,
+      success: (data) => {
+        console.log(data.validate);
+
+        alert(data.validate)
+        alert(data.Rtnfood)
+        //也可以用jquery來呈現結果
+      },
+      contentType: false,
+      processData: false,
+      dataType: "json"
+    });
+};
+</script>
+</body>
+
+
+</html>
