@@ -88,8 +88,8 @@ function login(){
   form_data.append('email', email);
   form_data.append('password', password);
 	//alert(document.querySelector('#username').value)
-// form_data.append('xxx', $("#xxx").text());
-//附帶text也是可以的
+  // form_data.append('xxx', $("#xxx").text());
+  //附帶text也是可以的
 
   var xhr = new XMLHttpRequest();  
     xhr.responseType = 'json';
@@ -111,8 +111,9 @@ function login(){
             //{'user_id': json_data.user_id,'username':username}
             
           }else{        
-            console.alert('login fail')
+            
             document.getElementById('login_fail').removeAttribute('hidden');
+            console.alert('login fail')
           }
         }
       };

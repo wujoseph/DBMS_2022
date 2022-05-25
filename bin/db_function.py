@@ -148,11 +148,11 @@ class learning_project_function:
 		print(sql_cmd)
 		self.db.engine.execute(sql_cmd)
 
-	def register(self,username,password):
+	def register(self,email,password):
 		sql_cmd = """
 		select *
 		from user
-		where username ='""" + username + "'"
+		where email ='""" + email + "'"
 		query_data = self.db.engine.execute(sql_cmd)
 		count = 0
 		for i in query_data:
@@ -161,9 +161,10 @@ class learning_project_function:
 				count = count + 1
 		#print(count)
 		if(count == 0):
-			sql_cmd = "insert into user values(null,'" + username + "', '" + password + "');"
+			sql_cmd = "insert into user values(null,'username', '" + password + "','" + email + "');"
 			query_data = self.db.engine.execute(sql_cmd)
-			return self.login_check(username,password)#return user_id
+			print(query_data)
+			return self.login_check(email,password)#return user_id
 		else:
 			return -1
 
@@ -172,7 +173,7 @@ class learning_project_function:
 		sql_cmd = """
 		select *
 		from task
-		where User_ID=""" + user_id +"""
+		where User_ID=""" + user_id + " and Group_ID is null" +"""
 		order by End_Date DESC"""
 		query_data = self.db.engine.execute(sql_cmd)
 		data = {}

@@ -38,6 +38,7 @@ def login_post():
 		username = user[1]
 		return jsonify({'status':'login_success','user_id':user_id,'username':username})
 
+#register
 @app.route('/Project/login',methods =['POST'])
 def login_input():
 	#username = request.form.get('username')
@@ -48,6 +49,10 @@ def login_input():
 		return jsonify({'status':'login_fail'})
 	else:
 		return jsonify({'status':'login_success','user_id':user_id})
+
+@app.route('/Project/register',methods =['GET'])
+def register():
+	return render_template("Register.html",**locals())
 
 @app.route('/Project/userpage',methods =['GET'])
 def userpage():
@@ -74,11 +79,11 @@ def add_task():
 	function.add_task(user_id,title)
 	return 'ok'
 
-@app.route('/Project/register',methods =['POST'])
-def register():
-	username = request.form.get('username')
+@app.route('/Project/register_check',methods =['POST'])
+def register_check():
+	email = request.form.get('email')
 	password = request.form.get('password')
-	user_id = function.register(username,password)
+	user_id = function.register(email,password)
 	if(user_id == -1):
 		return jsonify({'status':'register_fail'})
 	else:
