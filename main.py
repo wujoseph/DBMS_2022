@@ -15,43 +15,35 @@ db = SQLAlchemy(app)
 
 function = learning_project_function(db)
 
-@app.route("/test", methods=['GET'])
-def getname():
-    name = request.args.get('name')
-
-    sql_cmd = """
-        select Name
-        from world.city
-        where id = 1
-        """
-
-    query_data = db.engine.execute(sql_cmd)
-    st = "<html> <h1>Result:</h1>"
-    for i in query_data:
-        st = st + i[0]
-    st = st + "</html>"
-    return st
-    #return render_template("get.html",**locals())
 
 @app.route('/')
 def index():
     #return function.test_user()
     return 
 
-
-@app.route('/from_somewhere')
-def test():#receive request from here, calling other function and all the xml that need to collect
-	return "test"
-
 @app.route('/Project')
 def login():
-	return render_template("login_test.html",**locals())
+	return render_template("loginPage.html",**locals())
 
-@app.route('/Project/input',methods =['POST'])
-def login_input():
-	username = request.form.get('username')
+@app.route('/Project',methods =['POST'])
+def login_post():	
+	#username = request.form.get('username')
+	email = request.form.get('email')
 	password = request.form.get('password')
-	user_id = function.login_check(username,password)
+	user = function.login_check(email,password)
+	if(user == -1):
+		return jsonify({'status':'login_fail'})
+	else:
+		user_id = user[0]
+		username = user[1]
+		return jsonify({'status':'login_success','user_id':user_id,'username':username})
+
+@app.route('/Project/login',methods =['POST'])
+def login_input():
+	#username = request.form.get('username')
+	email = request.form.get('email')
+	password = request.form.get('password')
+	user_id = function.login_check(email,password)
 	if(user_id == -1):
 		return jsonify({'status':'login_fail'})
 	else:
@@ -59,12 +51,21 @@ def login_input():
 
 @app.route('/Project/userpage',methods =['GET'])
 def userpage():
-	return render_template("user_page.html",**locals())
+	return render_template("UserPage.html",**locals())
 
 @app.route('/Project/userpageinfo',methods =['POST'])
 def userpage_info():
 	user_id = request.form.get('user_id')
 	return jsonify(function.userpage_info(user_id))
+
+@app.route('/Project/changeName',methods =['POST'])
+def change_name():
+	user_id = request.form.get('user_id')
+	username = request.form.get('username')
+	function.change_name(user_id,username)
+	return ""
+
+
 
 @app.route('/Project/addtask',methods =['POST'])
 def add_task():
@@ -83,6 +84,9 @@ def register():
 	else:
 		return jsonify({'status':'register_success','user_id':user_id})
 
+
+
+
 @app.route('/Project/userAnalysis',methods =['GET'])
 def userpage_analysis():
 	return render_template("user_analysis.html",**locals())
@@ -91,6 +95,82 @@ def userpage_analysis():
 def userpage_info_analysis():
 	user_id = request.form.get('user_id')
 	return function.user_analysis(user_id)
+
+
+
+@app.route('/Project/task',methods =['GET'])
+def task():
+	return render_template("Task.html",**locals())
+
+@app.route('/Project/taskInfo',methods =['POST'])
+def task_info():
+	user_id = request.form.get('user_id')
+	return jsonify(function.task_info(user_id))
+
+@app.route('/Project/taskUpdate',methods =['POST'])
+def task_update():
+	task_id = request.form.get('task_id')
+	status = request.form.get('status')
+	print(task_id,status)
+	function.task_update(task_id,status)
+	return ""
+
+@app.route('/Project/analysis',methods =['GET'])
+def analysis():
+	return render_template("Analysis.html",**locals())
+
+@app.route('/Project/analysisInfo',methods =['POST'])
+def analysis_info():
+	user_id = request.form.get('user_id')
+	return jsonify(function.analysis_info(user_id))
+
+@app.route('/Project/groupPage',methods =['GET'])
+def group_page():
+	return render_template("GroupPage.html",**locals())
+
+@app.route('/Project/groupPageInfo',methods =['POST'])
+def group_page_info():
+	group_id = request.form.get('group_id')
+	return jsonify(function.group_page_info(group_id))
+
+@app.route('/Project/create_group',methods =['POST'])
+def create_group():
+	user_id = request.form.get('user_id')
+	group_name = request.form.get('group_name')
+	function.create_group(user_id,group_name)
+	return ""
+
+@app.route('/Project/join_group',methods =['POST'])
+def join_group():
+	user_id = request.form.get('user_id')
+	group_id = request.form.get('group_id')
+	text = function.join_group(user_id,group_id)
+	#print(text)
+	return jsonify(text)
+
+@app.route('/Project/group_task_info',methods =['POST'])
+def group_task_info():
+	group_id = request.form.get('group_id')
+	return jsonify(function.group_task_info(group_id))
+
+@app.route('/Project/group_task_update',methods =['POST'])
+def group_task_update():
+	task_id = request.form.get('task_id')
+	user_id = request.form.get('user_id')
+	group_id = request.form.get('group_id')
+	status = request.form.get('status')
+	#print(task_id,status)
+	function.group_task_update(task_id,user_id,group_id,status)
+	return ""
+
+@app.route('/Project/leaderboard_info',methods =['POST'])
+def leaderboard_info():
+	group_id = request.form.get('group_id')
+	return jsonify(function.leaderboard_info(group_id))
+
+@app.route('/Project/leaderboard',methods =['GET'])
+def leaderboard():
+	return render_template("Leaderboard.html",**locals())
 
 if __name__ == "__main__":
     app.run()

@@ -51,31 +51,30 @@ function user_page(){
   xhr.send(form_data);
  
   xhr.onreadystatechange = function() { 
-    var json_data = xhr.response;
-    console.log(json_data)
-    var complete = json_data.complete
-    var left = json_data.left
-    var tasks = json_data.tasks
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        var json_data = xhr.response;
+        var group_num;
+        if(json_data == null){
+          group_num = 0;
+        }else{
+          group_num = json_data.length;
+        }    
 
-    document.getElementById('user_id').innerHTML = getCookieByName('user_id');
-    document.getElementById('username').innerHTML = getCookieByName('username');
-    document.getElementById('mission_c').innerHTML = complete;
-    document.getElementById('mission_l').innerHTML = left;
-    for(let i = 0;i<tasks.length;i++){
-      const para = document.createElement("p");
-      var status = ""
-      if(tasks[i].status === 0){
-        status = "未完成"
-      }else{
-        status = "完成"
+        //insert option of group
+        for(let i =0;i<group_num;i++){
+          option = document.createElement("option");
+          const node = document.createTextNode(json_data[i]['name']);
+          option.appendChild(node);
+          option.setAttribute('value',i+1);
+          option.setAttribute('group_id',json_data[i]['id']);
+          document.getElementById("GroupList").appendChild(option);
+        }
+        document.getElementById('username').innerHTML = getCookieByName('username');
+        document.getElementById('groupnums').innerHTML = group_num;
       }
-
-      const node = document.createTextNode(tasks[i].title + " " + status);
-      para.appendChild(node);
-      document.getElementById("task").appendChild(para);
     }
-  }
-    
+  }    
 
 }
 
@@ -83,18 +82,18 @@ function user_page(){
 
 function login(){
   var form_data = new FormData();
-  var username = document.querySelector('#username').value
+  var email = document.querySelector('#email').value
   var password = document.querySelector('#password').value
 
-  form_data.append('username', document.querySelector('#username').value);
-  form_data.append('password', document.querySelector('#password').value);
+  form_data.append('email', email);
+  form_data.append('password', password);
 	//alert(document.querySelector('#username').value)
 // form_data.append('xxx', $("#xxx").text());
 //附帶text也是可以的
 
   var xhr = new XMLHttpRequest();  
     xhr.responseType = 'json';
-    xhr.open("POST", "/Project/input");
+    xhr.open("POST", "/Project");
     xhr.send(form_data); 
     
     xhr.onreadystatechange = function() { 
@@ -105,16 +104,15 @@ function login(){
           var json_data = xhr.response;          
           if(json_data.status === 'login_success'){//change the page to userpage
             //user_page()
-            document.getElementById('response').innerHTML='successful login';
-            document.getElementById('response').style.display='block';
             document.cookie = "user_id=" + json_data.user_id;
-            document.cookie = "username=" + username;
+            document.cookie = "username=" + json_data.username;
             window.location.href = '/Project/userpage';
+            console.alert('login success')
             //{'user_id': json_data.user_id,'username':username}
             
-          }else{          
-            document.getElementById('response').innerHTML='username or password not correct';
-            document.getElementById('response').style.display='block';
+          }else{        
+            console.alert('login fail')
+            document.getElementById('login_fail').removeAttribute('hidden');
           }
         }
       };
@@ -188,19 +186,118 @@ function user_analysis_info(){
   xhr.send(form_data);
  
   xhr.onreadystatechange = function() { 
-    var json_data = xhr.response;
-    console.log(json_data)
-    for(var key in json_data){      
-      const para = document.createElement("p");
-      const node = document.createTextNode( key + " " + json_data[key][0]+ "/" + json_data[key][1] + " " + json_data[key][2]);
-      para.appendChild(node);
-      document.getElementById("analysis").appendChild(para);
-      
-    }  
-      
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        var json_data = xhr.response;
+        console.log(json_data)
+        for(var key in json_data){      
+          const para = document.createElement("p");
+          const node = document.createTextNode( key + " " + json_data[key][0]+ "/" + json_data[key][1] + " " + json_data[key][2]);
+          para.appendChild(node);
+          document.getElementById("analysis").appendChild(para);
+          
+        } 
+      }
+    }    
+  }
+}
 
-    
+//not sure, first try the submit form
+function change_name(){
+  var form_data = new FormData();
+  form_data.append('user_id', getCookieByName('user_id'));
+  var username = document.getElementById("inputUserSetting").value
+  console.log(username)
+  form_data.append('username',username);
+  //delete cookie before update it
+  document.cookie = "username=" + getCookieByName('username') +"; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
+  document.cookie = "username=" + username;//update cookie so other page can be refreshed
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/changeName");
+  xhr.send(form_data);
+  
+  xhr.onreadystatechange = function() { 
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        
+        window.location.href = '/Project/userpage';
+        //console.log('???????????')
+      }
+    }    
   }
 }
 
 
+function create_group(){
+  var form_data = new FormData();
+  form_data.append('user_id', getCookieByName('user_id'));
+  var group_name = document.getElementById("create_group_input").value;
+  //console.log(group_name)
+  form_data.append('group_name',group_name);
+
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/create_group");
+  xhr.send(form_data);
+  
+  xhr.onreadystatechange = function() { 
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){        
+        window.location.href = '/Project/userpage';
+      }
+    }    
+  }
+}
+
+function join_group(){
+  var form_data = new FormData();
+  form_data.append('user_id', getCookieByName('user_id'));
+  var group_id = document.getElementById("join_group_input").value;
+  form_data.append('group_id',group_id);
+
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/join_group");
+  xhr.send(form_data);
+  
+  xhr.onreadystatechange = function() { 
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){        
+        var res = xhr.response;
+        console.log(res)
+        if(res === "not exist"){
+          var warning = document.getElementById("join_group_warning")
+          warning.removeAttribute('hidden');
+          warning.innerHTML = "Group ID not exist"
+        }else if(res === "exist"){
+          var warning = document.getElementById("join_group_warning")
+          warning.removeAttribute('hidden');
+          warning.innerHTML = "Already in the group"
+        }else{          
+          window.location.href = '/Project/userpage';
+        }
+        
+      }
+    }    
+  }
+}
+
+
+function change_group_page(){
+  //create cookie of group_id and change to group page
+  var select = document.getElementById("GroupList");
+  if(select.value === 0)return;//default selection
+
+  var childs = select.childNodes;
+  //console.log(select.value);
+  var option = childs[4+parseInt(select.value)];
+  var group_id = option.getAttribute('group_id');
+  console.log(group_id);
+
+  //create an new cookie to access group page, also delete former id
+  document.cookie = "group_id=" + group_id +"; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
+  document.cookie = "group_id=" + group_id;//update cookie so other page can be refreshed
+
+  window.location.href = '/Project/groupPage';
+}
