@@ -30,7 +30,7 @@ function group_info(){
 function group_task_info(){
   var form_data = new FormData();
   form_data.append('group_id', getCookieByName('group_id'));
-  
+  form_data.append('user_id', getCookieByName('user_id'));
   var xhr = new XMLHttpRequest();  
   xhr.responseType = 'json';
   xhr.open("post", "/Project/group_task_info");
@@ -97,6 +97,99 @@ function group_complete_click(task){
     if (xhr.readyState == 4){
       if (xhr.status == 200){
         window.location.href = '/Project/groupPage';
+      }
+    }    
+  }
+}
+
+function add_group_task(){
+  var form_data = new FormData();
+  form_data.append('user_id', getCookieByName('user_id'));
+  form_data.append('group_id', getCookieByName('group_id'));
+
+  form_data.append('title', document.getElementById("TaskName").value);
+  form_data.append('note', document.getElementById("note").value);
+  form_data.append('start_date', document.getElementById("Start").value);
+  form_data.append('end_date', document.getElementById("End").value);
+  
+
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/add_group_task");
+  xhr.send(form_data);
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        window.location.href = '/Project/groupPage';//refresh the task page
+      }
+    }    
+  }
+}
+
+Date.prototype.timeNow = function () {
+     return ((this.getHours() < 10)?"0":"") + this.getHours() +":"+ ((this.getMinutes() < 10)?"0":"") + this.getMinutes() +":"+ ((this.getSeconds() < 10)?"0":"") + this.getSeconds();
+}
+
+function send_message(){
+  var str = document.getElementById("input").value
+  var mes_fra = document.getElementsByClassName("messageframe")[0].cloneNode(true);
+  var mes_box = mes_fra.childNodes[1];
+  var mes = mes_box.childNodes[1];
+  mes.innerHTML = str;
+  mes_fra.removeAttribute('hidden');
+  document.getElementsByClassName("chatbox")[0].appendChild(mes_fra);
+
+  document.getElementById("input").value = "";
+
+  var today = new Date();
+  var time = new Date().timeNow();
+  mes_fra.childNodes[3].innerHTML = time
+  
+  var form_data = new FormData();
+  form_data.append('group_id', getCookieByName('group_id'));
+  form_data.append('text', str);
+  form_data.append('time', time);
+
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/add_comment");
+  xhr.send(form_data);
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        window.location.href = '/Project/groupPage';//refresh the task page
+      }
+    }    
+  }
+}
+
+function comment_info(){
+  var form_data = new FormData();
+  form_data.append('group_id', getCookieByName('group_id'));
+
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/comment_info");
+  xhr.send(form_data);
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        var json_data = xhr.response;
+        for(let i = 0;i<json_data.length;i++){
+          var text = json_data[i][0];
+          var time = json_data[i][1];
+
+          var mes_fra = document.getElementsByClassName("messageframe")[0].cloneNode(true);
+          var mes_box = mes_fra.childNodes[1];
+          var mes = mes_box.childNodes[1];
+          mes.innerHTML = text;
+          mes_fra.removeAttribute('hidden');
+          document.getElementsByClassName("chatbox")[0].appendChild(mes_fra);
+          mes_fra.childNodes[3].innerHTML = time;
+        }
       }
     }    
   }

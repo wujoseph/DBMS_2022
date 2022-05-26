@@ -83,12 +83,11 @@ class learning_project_function:
 		#print(return_list)
 		return return_list
 
-	def group_task_info(self,group_id):
+	def group_task_info(self,user_id,group_id):
 		sql_cmd = """
 		select *
 		from task
-		where Group_ID = """+str(group_id)+"""
-		group by Task_ID"""
+		where Group_ID = """+str(group_id)+" and user_id = "+str(user_id)
 		return_list = []
 		query_data = self.db.engine.execute(sql_cmd)
 		for i in query_data:
@@ -140,13 +139,35 @@ class learning_project_function:
 		where Task_ID = """+str(task_id)
 		query_data = self.db.engine.execute(sql_cmd)
 
-	def add_task(self,user_id,title):
-		now = datetime.now()
-		date_time = now.strftime("%Y-%m-%d")
+	#get available task_id that hadn't been used
+	def task_id_get(self):
+		sql_cmd = """
+		select *
+		from task
+		order by task_id desc"""
+		query_data = self.db.engine.execute(sql_cmd)
+		return query_data.first()[0]+1
+
+	#personal task
+	def add_task(self,user_id,title,note,start_date,end_date):
+		task_id = self.task_id_get()
 		#insert into task values(null,1,null,1,'flusk design','2022-05-08');
-		sql_cmd = "insert into task values(null," + str(user_id) +",null,0,'"+title + "','" + str(date_time) + "');"
+		sql_cmd = "insert into task values("+str(task_id) + "," + str(user_id) +",null,0,'"+title + "','" + str(start_date) + "','" + str(end_date) + "','" + note + "',null);"
 		print(sql_cmd)
 		self.db.engine.execute(sql_cmd)
+
+	#group task
+	def add_group_task(self,user_id,group_id,title,note,start_date,end_date):
+		#create group task for all the user in the group
+		task_id = self.task_id_get()
+
+		group_li = self.group_page_info(group_id)[1]
+		for member_id in group_li:
+			#insert into task values(null,1,null,1,'flusk design','2022-05-08');
+			sql_cmd = "insert into task values("+str(task_id) + "," + str(member_id) +",0,0,'"+title + "','" + str(start_date) + "','" + str(end_date) + "','" + note + "'," + group_id + ");"
+			print(sql_cmd)
+			self.db.engine.execute(sql_cmd)
+
 
 	def register(self,email,password):
 		sql_cmd = """
@@ -262,6 +283,23 @@ class learning_project_function:
 		group_name = first[1]
 		sql_cmd = "insert into learning_group values("+group_id+",'"+group_name+"',"+user_id+");"
 		self.db.engine.execute(sql_cmd)
+
+		#insert all the task in that group
+		sql_cmd = """ select distinct task_ID, done_number,title,start_date,end_date,description
+		from task
+		where Group_ID = """ + group_id;
+		data = self.db.engine.execute(sql_cmd)
+		for i in data:
+			task_id = i[0]
+			done_number = i[1]
+			title = i[2]
+			start_date = i[3]
+			end_date = i[4]
+			note = i[5]
+			sql_cmd = "insert into task values("+str(task_id) + "," + str(user_id) +","+ str(done_number) +",0,'"+title + "','" + str(start_date) + "','" + str(end_date) + "','" + note + "'," + group_id + ");"
+			print(sql_cmd)
+			self.db.engine.execute(sql_cmd)
+
 		return "success"
 
 	def leaderboard_info(self,group_id):
@@ -287,6 +325,24 @@ class learning_project_function:
 			total = user[i][1]
 			user[i].append("{0:.0%}".format(status/total))
 		#print(user)
-		return_list = [k for v,k in sorted(user.items(), key=lambda item: item[1][1],reverse=True)] 
-		#print(return_list)
+		return_list = [k for v,k in sorted(user.items(), key=lambda item: item[1][0],reverse=True)] 
+		print(return_list)
+		return return_list
+
+	def add_comment(self,group_id,text,time):
+		sql_cmd = "insert into comment values(null,"+str(group_id) + ",'" + str(time) + "','" + text + "');"
+		print(sql_cmd)
+		self.db.engine.execute(sql_cmd)
+
+	def comment_info(self,group_id):
+		sql_cmd = """
+		select *
+		from comment
+		where group_id = """ + str(group_id) + """
+		order by id"""
+		data = self.db.engine.execute(sql_cmd)
+		return_list = []
+		for i in data:
+			return_list.append([str(i[3]),str(i[2])])
+		print(return_list)
 		return return_list

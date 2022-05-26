@@ -69,3 +69,25 @@ function complete_click(task){
     }    
   }
 }
+
+function add_task(){
+  var form_data = new FormData();
+  form_data.append('user_id', getCookieByName('user_id'));
+  form_data.append('title', document.getElementById("TaskName").value);
+  form_data.append('note', document.getElementById("note").value);
+  form_data.append('start_date', document.getElementById("Start").value);
+  form_data.append('end_date', document.getElementById("End").value);
+  
+  var xhr = new XMLHttpRequest();  
+  xhr.responseType = 'json';
+  xhr.open("post", "/Project/add_task");
+  xhr.send(form_data);
+
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        window.location.href = '/Project/task';//refresh the task page
+      }
+    }    
+  }
+}

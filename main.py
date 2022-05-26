@@ -7,7 +7,7 @@ from flask import render_template
 from bin.db_function import learning_project_function
 
 app = Flask(__name__,template_folder='Templates',static_url_path='', 
-            static_folder='')
+			static_folder='')
 
 app.config['SQLALCHEMY_DATABASE_URI'] = "mysql+pymysql://test:test@localhost:3306/project_schema"
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
@@ -17,9 +17,8 @@ function = learning_project_function(db)
 
 
 @app.route('/')
-def index():
-    #return function.test_user()
-    return 
+def index():    
+	return login()
 
 @app.route('/Project')
 def login():
@@ -70,13 +69,27 @@ def change_name():
 	function.change_name(user_id,username)
 	return ""
 
-
-
-@app.route('/Project/addtask',methods =['POST'])
+@app.route('/Project/add_task',methods =['POST'])
 def add_task():
 	title = request.form.get('title')
+	note = request.form.get('note')
+	start_date = request.form.get('start_date')
+	end_date = request.form.get('end_date')
 	user_id = request.form.get('user_id')
-	function.add_task(user_id,title)
+	#print(end_date,str(end_date))
+	function.add_task(user_id,title,note,start_date,end_date)
+	return 'ok'
+
+@app.route('/Project/add_group_task',methods =['POST'])
+def add_group_task():
+	title = request.form.get('title')
+	note = request.form.get('note')
+	start_date = request.form.get('start_date')
+	end_date = request.form.get('end_date')
+	user_id = request.form.get('user_id')
+	group_id = request.form.get('group_id')
+	#print(end_date,str(end_date))
+	function.add_group_task(user_id,group_id,title,note,start_date,end_date)
 	return 'ok'
 
 @app.route('/Project/register_check',methods =['POST'])
@@ -156,7 +169,8 @@ def join_group():
 @app.route('/Project/group_task_info',methods =['POST'])
 def group_task_info():
 	group_id = request.form.get('group_id')
-	return jsonify(function.group_task_info(group_id))
+	user_id = request.form.get('user_id')
+	return jsonify(function.group_task_info(user_id,group_id))
 
 @app.route('/Project/group_task_update',methods =['POST'])
 def group_task_update():
@@ -177,6 +191,21 @@ def leaderboard_info():
 def leaderboard():
 	return render_template("Leaderboard.html",**locals())
 
+@app.route('/Project/add_comment',methods =['POST'])
+def add_comment():
+	group_id = request.form.get('group_id')
+	text = request.form.get('text')
+	time = request.form.get('time')
+	function.add_comment(group_id,text,time)
+	return "OK"
+
+
+@app.route('/Project/comment_info',methods =['POST'])
+def comment_info():
+	group_id = request.form.get('group_id')
+	return jsonify(function.comment_info(group_id))
+
+
 if __name__ == "__main__":
-    app.run()
+	app.run()
 

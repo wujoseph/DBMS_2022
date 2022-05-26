@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<script>
+    function send(){    
+        var str = document.getElementById("input").value
+        var mes_box = document.getElementsByClassName("messagebox")[0].cloneNode(true);
+        var mes = mes_box.childNodes[1];
+        mes.innerHTML = str;
+        mes_box.removeAttribute('hidden');
+        document.getElementsByClassName("chatbox")[0].appendChild(mes_box);
+    }
+</script>
+    <head>
+    <style>
+        
+        .chatbox{
+            width:230px;
+            height: 500px;
+            background-color: white;
+            padding: 10px;
+            overflow: auto;
+        }
+
+        .messagebox{
+            width: 70%;
+            background-color: #00ffbf;            
+            overflow-wrap: break-word;
+            border: 1.5px solid;
+            border-radius: 5px;
+            border-color: #404040;
+            padding: 15px;
+            margin: 5px;
+        }
+        .message{
+            color: black
+        }
+    </style>
+</head>
+<body style="background-color:black">
+
+<div class="chatbox" >
+    <div class="messagebox" hidden>
+        <div class="message">
+        </div>
+    </div>
+</div>
+<input type="input" id="input">
+<button type="button" onclick="send()">send</button>
+
+
+</body>
+
+
+</html>

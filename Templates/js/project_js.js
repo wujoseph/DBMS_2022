@@ -32,8 +32,12 @@ function add_task(task_name){
   xhr.open("post", "/Project/addtask");
   xhr.send(form_data);
 
-  xhr.onreadystatechange = function() { 
-    window.location.href = '/Project/userpage';//refresh the task page
+  xhr.onreadystatechange = function() {
+    if (xhr.readyState == 4){
+      if (xhr.status == 200){
+        window.location.href = '/Project/task';//refresh the task page
+      }
+    }    
   }
 }
 
@@ -104,6 +108,9 @@ function login(){
           var json_data = xhr.response;          
           if(json_data.status === 'login_success'){//change the page to userpage
             //user_page()
+            document.cookie = "user_id=" + getCookieByName('user_id') +"; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
+            document.cookie = "username=" + getCookieByName('username') +"; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/";
+
             document.cookie = "user_id=" + json_data.user_id;
             document.cookie = "username=" + json_data.username;
             window.location.href = '/Project/userpage';
@@ -301,4 +308,16 @@ function change_group_page(){
   document.cookie = "group_id=" + group_id;//update cookie so other page can be refreshed
 
   window.location.href = '/Project/groupPage';
+}
+
+
+function close_new_task_window(){
+  document.getElementById("background").setAttribute('hidden',true);
+  document.getElementById("input_task").setAttribute('hidden',true);
+}
+
+
+function new_task_window(){
+  document.getElementById("background").removeAttribute('hidden');
+  document.getElementById("input_task").removeAttribute('hidden');
 }
