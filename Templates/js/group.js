@@ -16,8 +16,16 @@ function group_info(){
         document.getElementById('group_id').innerHTML = group_id;
         document.getElementById('group_name').innerHTML = json_data[0];
         var members_st = ""
+        /*
         for(var i in json_data[1]){
           members_st += json_data[1][i] + ', '
+        }*/
+        let member_num = 0
+         for(var i in json_data[1]){          
+          members_st += json_data[1][i]
+          member_num++;
+          if(member_num < Object.keys(json_data[1]).length)members_st += ', '
+          
         }
         console.log(members_st)
         document.getElementById('group_members').innerHTML = members_st;

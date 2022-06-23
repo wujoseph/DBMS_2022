@@ -198,19 +198,26 @@ class learning_project_function:
 		order by End_Date DESC"""
 		query_data = self.db.engine.execute(sql_cmd)
 		data = {}
+		complete = 0
+		total = 0
 		for i in query_data:
+			total = total + 1
 			if(str(i[6]) not in data):
 				if(i[3] == 1):
 					data[str(i[6])] = [1,1]
+					complete += 1
 				else:
 					data[str(i[6])] = [0,1]
 			else:
 				data[str(i[6])][1] = data[str(i[6])][1] + 1
 				if(i[3] == 1):
 					data[str(i[6])][0] = data[str(i[6])][0] + 1
+					complete += 1
 				#else:
 		for i in data:
 			data[i].append("{0:.0%}".format(data[i][0]/data[i][1]))
+		#print(data)
+		data['total'] = [complete,total]
 		#print(data)
 		return data
 
@@ -243,7 +250,7 @@ class learning_project_function:
 		group_name = data.first()[0]
 		return_list.append(group_name)
 		return_list.append(group_member)
-		#print(return_list)
+		print(return_list)
 		return return_list
 
 	def create_group(self,user_id,group_name):
@@ -314,7 +321,7 @@ class learning_project_function:
 		for i in data:
 			#print(i)
 			if(i[1] not in user):
-				user[i[1]]= [i[3],1,i[9]]#status,1,name
+				user[i[1]]= [i[3],1,i[9],i[1]]#status,1,name,id
 			else:
 				#print(user[i[1]])
 				user[i[1]][1]= user[i[1]][1] + 1
@@ -324,6 +331,10 @@ class learning_project_function:
 			status = user[i][0]
 			total = user[i][1]
 			user[i].append("{0:.0%}".format(status/total))
+		if(len(user) == 0):#bug due to no task
+			member_di = self.group_page_info(group_id)[1]
+			for i in member_di:
+				user[i] = [0,0,member_di[i],i,"N/A"]
 		#print(user)
 		return_list = [k for v,k in sorted(user.items(), key=lambda item: item[1][0],reverse=True)] 
 		print(return_list)
@@ -346,3 +357,20 @@ class learning_project_function:
 			return_list.append([str(i[3]),str(i[2])])
 		print(return_list)
 		return return_list
+
+	def leaderboard_insert(self,user_id,group_id,num):
+		sql_cmd = "insert into leaderboard values(" + str(user_id) + "," + str(group_id) + ","+ str(num) + ")"
+		self.db.engine.execute(sql_cmd)
+
+	def leaderboard_update(self):
+		sql_cmd = "select distinct group_id from learning_group;"
+		data = self.db.engine.execute(sql_cmd)
+		group_li = []
+		for i in data:
+			group_li.append(int(i[0]))
+		print(group_li)
+
+		for i in group_li:
+			lead_info = self.leaderboard_info(str(i))
+			for j in lead_info:
+				self.leaderboard_insert(j[3],i,j[0])

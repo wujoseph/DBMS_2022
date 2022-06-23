@@ -180,6 +180,7 @@ def group_task_update():
 	status = request.form.get('status')
 	#print(task_id,status)
 	function.group_task_update(task_id,user_id,group_id,status)
+	#function.leaderboard_update()
 	return ""
 
 @app.route('/Project/leaderboard_info',methods =['POST'])

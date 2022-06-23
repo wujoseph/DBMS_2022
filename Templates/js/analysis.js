@@ -9,14 +9,21 @@ function analysis_info(){
   xhr.onreadystatechange = function() { 
     if (xhr.readyState == 4){
       if (xhr.status == 200){
+        
         var json_data = xhr.response;
+        console.log(json_data);
         //var total = json_data.length;
-        var total = Object.keys(json_data).length
-        var complete = 0;
+        var total;
+        var complete;
         var key_li = []
         for(var key in json_data){
-          complete += json_data[key][0];
-          key_li.push(key)
+          if(key === 'total'){
+            complete = json_data[key][0]
+            total = json_data[key][1]
+          }else{
+            key_li.push(key)
+          }
+          
         }
         var insert = document.getElementById("insert");
         var node = document.getElementById("copy").cloneNode(true);
@@ -25,7 +32,7 @@ function analysis_info(){
         node.childNodes[1].innerHTML = "Total";
         node.childNodes[5].innerHTML = complete;
         node.childNodes[7].innerHTML = total;
-        node.childNodes[9].innerHTML = parseFloat(complete/total).toFixed(2)*100+"%";
+        node.childNodes[9].innerHTML = (parseFloat(complete/total)*100).toFixed(2)+"%";
         insert.appendChild(node);
 
         key_li.sort().reverse()

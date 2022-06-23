@@ -39,7 +39,7 @@ function leaderboard_info(){
             node.childNodes[1].innerHTML = i+1;
             node.childNodes[5].innerHTML = json_data[i][2];
             node.childNodes[7].innerHTML = json_data[i][0];
-            node.childNodes[9].innerHTML = json_data[i][3];
+            node.childNodes[9].innerHTML = json_data[i][4];
             insert.appendChild(node);
         }
       }
